@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Text Repeater Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --primary-hover: #1e40af;
+      --background: #ffffff;
+      --foreground: #111827;
+      --input-bg: #f9fafb;
+      --border-color: #d1d5db;
+      --label-color: #374151;
+      --checkbox: #2563eb;
+    }
+    body.dark {
+      --background: #0e1013;
+      --foreground: #e2e8f0;
+      --input-bg: #161a1f;
+      --border-color: #374151;
+      --label-color: #94a3b8;
+      --checkbox: #4ade80;
+      --primary-color: #4ade80;
+      --primary-hover: #22c55e;
+    }
+    body {
+      background: var(--background);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+    .container {
+      background: var(--background);
+      border-radius: 12px;
+      padding: 40px 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      max-width: 420px;
+      width: 100%;
+      color: var(--foreground);
+      transition: background 0.3s, color 0.3s;
+      position: relative;
+    }
+    .container h1 {
+      margin-bottom: 25px;
+      color: var(--primary-color);
+      text-align: center;
+      font-size: 26px;
+      letter-spacing: 0.5px;
+    }
+    .toggle-mode {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      cursor: pointer;
+      font-size: 20px;
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      padding: 5px;
+      border-radius: 50%;
+      transition: background 0.3s, color 0.3s;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .toggle-mode:hover {
+      background: var(--primary-color);
+      color: var(--background);
+    }
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: 500;
+      color: var(--label-color);
+      text-align: center;
+    }
+    /* Your Text & Repeat Times ইনপুট বক্স */
+    #text-input,
+    #amount-input {
+      width: 80%;
+      max-width: 350px;
+      padding: 10px 12px;
+      margin: 8px auto 0 auto;
+      display: block;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--input-bg);
+      color: var(--foreground);
+      font-size: 14px;
+      transition: border 0.3s, box-shadow 0.3s, background 0.3s;
+    }
+    /* Output textarea: একই প্রস্থ, বড় height */
+    #output-box {
+      width: 80%;
+      max-width: 350px;
+      height: 200px;
+      padding: 12px 15px;
+      margin: 20px auto 0 auto;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--input-bg);
+      color: var(--foreground);
+      font-size: 15px;
+      resize: vertical;
+      display: block;
+    }
+    #text-input:focus,
+    #amount-input:focus,
+    #output-box:focus {
+      border: 2px solid var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+      outline: none;
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    .checkbox-group input {
+      margin-right: 10px;
+      accent-color: var(--checkbox);
+    }
+    .checkbox-group label {
+      color: var(--label-color);
+      margin: 0;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+      display: block;
+    }
+    button:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+    button.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    /* Toast Styles */
+    #copy-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary-color);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <button class="toggle-mode" onclick="toggleMode()">🌙</button>
+    <h1>Text Repeater</h1>
+
+    <label for="text-input">Your Text</label>
+    <input type="text" id="text-input" placeholder="Type something...">
+
+    <label for="amount-input">Repeat Times</label>
+    <input type="number" id="amount-input" placeholder="Number of times">
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="line-break" checked />
+      <label for="line-break">Add line breaks</label>
+    </div>
+
+    <button id="generate-btn" onclick="generateText()">Generate</button>
+
+    <label for="output-box">Output</label>
+    <textarea id="output-box" readonly></textarea>
+
+    <button onclick="copyText()">Copy</button>
+  </div>
+
+  <!-- Toast message -->
+  <div id="copy-toast">Copied!</div>
+
+  <script>
+    function generateText() {
+      const btn = document.getElementById('generate-btn');
+      btn.classList.add('loading');
+      btn.textContent = "Generating...";
+      setTimeout(() => {
+        let text = document.getElementById('text-input').value.trim();
+        let amount = parseInt(document.getElementById('amount-input').value);
+        let includeLineBreaks = document.getElementById('line-break').checked;
+        let outputBox = document.getElementById('output-box');
+
+        if (!text) {
+          outputBox.value = "⚠️ Please enter text.";
+        } else if (isNaN(amount) || amount <= 0) {
+          outputBox.value = "⚠️ Please enter a valid number.";
+        } else {
+          let separator = includeLineBreaks ? '\n' : ' ';
+          let result = Array(amount).fill(text).join(separator);
+          outputBox.value = result;
+        }
+        btn.classList.remove('loading');
+        btn.textContent = "Generate";
+      }, 500);
+    }
+
+    function copyText() {
+      let outputBox = document.getElementById('output-box');
+      outputBox.select();
+      outputBox.setSelectionRange(0, 99999); // For mobile devices
+
+      try {
+        if (document.execCommand('copy')) {
+          showCopyToast();
+        } else {
+          alert('Copy failed! Please try manually.');
+        }
+      } catch (err) {
+        alert('Copy error: ' + err);
+      }
+    }
+
+    function showCopyToast() {
+      const toast = document.getElementById('copy-toast');
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+      }, 2000);
+    }
+
+    function toggleMode() {
+      document.body.classList.toggle('dark');
+      const toggleBtn = document.querySelector('.toggle-mode');
+      toggleBtn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    }
+  </script>
+
+</body>
+</html>
