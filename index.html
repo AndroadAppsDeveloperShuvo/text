@@ -1,264 +1,307 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Text Repeater Tool</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Text Repeater Pro - By Shuvo</title>
+  
+  <!-- Toastify -->
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+
   <style>
+    /* Professional Theme Variables */
     :root {
-      --primary-color: #2563eb;
-      --primary-hover: #1e40af;
-      --background: #ffffff;
-      --foreground: #111827;
-      --input-bg: #f9fafb;
-      --border-color: #d1d5db;
-      --label-color: #374151;
-      --checkbox: #2563eb;
+      --bg-color: #e2e8f0;
+      --card-bg: #ffffff;
+      --text-main: #000000;
+      --text-muted: #475569;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --border-color: #cbd5e1;
+      --input-bg: #f8fafc;
+      --success: #10b981;
+      --danger: #ef4444;
+      --whatsapp: #25D366;
+      --whatsapp-hover: #128C7E;
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
     }
-    body.dark {
-      --background: #0e1013;
-      --foreground: #e2e8f0;
-      --input-bg: #161a1f;
-      --border-color: #374151;
-      --label-color: #94a3b8;
-      --checkbox: #4ade80;
-      --primary-color: #4ade80;
-      --primary-hover: #22c55e;
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg-color: #020617;
+      --card-bg: #0f172a;
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --border-color: #334155;
+      --input-bg: #1e293b;
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
     }
+
+    * {
+      box-sizing: border-box; margin: 0; padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: background-color 0.3s, color 0.3s, border-color 0.2s;
+    }
+
     body {
-      background: var(--background);
-      font-family: 'Poppins', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      transition: background 0.3s, color 0.3s;
+      background: var(--bg-color); color: var(--text-main);
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; padding: 20px;
     }
-    .container {
-      background: var(--background);
-      border-radius: 12px;
-      padding: 40px 30px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      max-width: 420px;
-      width: 100%;
-      color: var(--foreground);
-      transition: background 0.3s, color 0.3s;
+
+    .generator-card {
+      background: var(--card-bg); width: 100%; max-width: 480px;
+      padding: 30px; border-radius: 20px; box-shadow: var(--shadow-lg);
       position: relative;
     }
-    .container h1 {
-      margin-bottom: 25px;
-      color: var(--primary-color);
-      text-align: center;
-      font-size: 26px;
-      letter-spacing: 0.5px;
+
+    /* Header & Settings */
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .header h1 { font-size: 22px; font-weight: 800; color: var(--text-main); }
+
+    .settings-btn { background: transparent; border: none; color: var(--text-main); cursor: pointer; padding: 8px; border-radius: 50%; }
+    .settings-btn:hover { background: var(--border-color); }
+    .settings-btn svg { width: 22px; height: 22px; fill: currentColor; }
+
+    .settings-dropdown {
+      position: absolute; top: 70px; right: 30px; background: var(--card-bg);
+      border: 2px solid var(--border-color); box-shadow: var(--shadow-lg);
+      border-radius: 12px; padding: 15px; width: 180px; display: none; z-index: 10;
     }
-    .toggle-mode {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      cursor: pointer;
-      font-size: 20px;
-      background: none;
-      border: none;
-      color: var(--primary-color);
-      padding: 5px;
-      border-radius: 50%;
-      transition: background 0.3s, color 0.3s;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .settings-dropdown.active { display: block; animation: popIn 0.2s ease-out; }
+    .setting-item { display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 700; }
+
+    /* Toggle Switch */
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); border-radius: 34px; transition: .4s; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .4s; }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* Input Groups */
+    .input-group { margin-bottom: 16px; text-align: left; }
+    .input-group label { display: block; font-size: 14px; color: var(--text-main); margin-bottom: 8px; font-weight: 700; }
+    
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%; padding: 14px; border: 2px solid var(--border-color);
+      background: var(--input-bg); color: var(--text-main); border-radius: 10px;
+      font-size: 15px; outline: none; font-weight: 600;
     }
-    .toggle-mode:hover {
-      background: var(--primary-color);
-      color: var(--background);
-    }
-    label {
-      display: block;
-      margin-top: 20px;
-      font-weight: 500;
-      color: var(--label-color);
-      text-align: center;
-    }
-    /* Your Text & Repeat Times ইনপুট বক্স */
-    #text-input,
-    #amount-input {
-      width: 80%;
-      max-width: 350px;
-      padding: 10px 12px;
-      margin: 8px auto 0 auto;
-      display: block;
-      border: 2px solid var(--border-color);
-      border-radius: 8px;
-      background: var(--input-bg);
-      color: var(--foreground);
-      font-size: 14px;
-      transition: border 0.3s, box-shadow 0.3s, background 0.3s;
-    }
-    /* Output textarea: একই প্রস্থ, বড় height */
-    #output-box {
-      width: 80%;
-      max-width: 350px;
-      height: 200px;
-      padding: 12px 15px;
-      margin: 20px auto 0 auto;
-      border: 2px solid var(--border-color);
-      border-radius: 8px;
-      background: var(--input-bg);
-      color: var(--foreground);
-      font-size: 15px;
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+    
+    select { cursor: pointer; appearance: none; }
+    
+    textarea {
+      min-height: 120px;
       resize: vertical;
-      display: block;
+      font-weight: 500;
     }
-    #text-input:focus,
-    #amount-input:focus,
-    #output-box:focus {
-      border: 2px solid var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-      outline: none;
+
+    .flex-row { display: flex; gap: 12px; margin-bottom: 16px; }
+    .flex-1 { flex: 1; }
+
+    /* Buttons */
+    .btn {
+      width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 15px;
+      font-weight: 800; cursor: pointer; transition: 0.2s; color: #fff;
+      display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px;
     }
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 15px;
-    }
-    .checkbox-group input {
-      margin-right: 10px;
-      accent-color: var(--checkbox);
-    }
-    .checkbox-group label {
-      color: var(--label-color);
-      margin: 0;
-    }
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 14px;
-      background: var(--primary-color);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
-      position: relative;
-      overflow: hidden;
-      display: block;
-    }
-    button:hover {
-      background: var(--primary-hover);
-      transform: translateY(-2px);
-    }
-    button.loading {
-      pointer-events: none;
-      opacity: 0.7;
-    }
-    /* Toast Styles */
-    #copy-toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--primary-color);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 6px;
-      font-size: 14px;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      pointer-events: none;
-      z-index: 9999;
-    }
+    .btn:active:not(:disabled) { transform: scale(0.98); }
+    .btn:disabled { background: var(--border-color) !important; color: var(--text-muted); cursor: not-allowed; transform: none; }
+    .btn-primary { background: var(--primary); }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-success { background: var(--success); }
+    .btn-success:hover:not(:disabled) { background: #059669; }
+    .btn-danger { background: transparent; border: 2px solid var(--border-color); color: var(--text-main); }
+    .btn-danger:hover { border-color: var(--danger); color: var(--danger); }
+    .btn-whatsapp { background: var(--whatsapp); }
+    .btn-whatsapp:hover { background: var(--whatsapp-hover); }
+
+    /* Result Section */
+    .result-section { display: none; margin-top: 20px; border-top: 2px dashed var(--border-color); padding-top: 20px; animation: fadeIn 0.4s ease; }
+    .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-group .btn { margin-top: 0; flex: 1; }
+
+    /* Footer */
+    .footer { margin-top: 25px; text-align: center; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+    .footer span { color: var(--primary); font-weight: 800; }
+
+    @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <button class="toggle-mode" onclick="toggleMode()">🌙</button>
-    <h1>Text Repeater</h1>
+  <div class="generator-card">
+    
+    <!-- Header -->
+    <div class="header">
+      <h1>Text Repeater Pro</h1>
+      <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()" title="Settings">
+        <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+      </button>
 
-    <label for="text-input">Your Text</label>
-    <input type="text" id="text-input" placeholder="Type something...">
-
-    <label for="amount-input">Repeat Times</label>
-    <input type="number" id="amount-input" placeholder="Number of times">
-
-    <div class="checkbox-group">
-      <input type="checkbox" id="line-break" checked />
-      <label for="line-break">Add line breaks</label>
+      <div class="settings-dropdown" id="settingsMenu">
+        <div class="setting-item">
+          <span>Dark Mode</span>
+          <label class="switch"><input type="checkbox" id="themeToggle" onchange="toggleTheme()"><span class="slider"></span></label>
+        </div>
+      </div>
     </div>
 
-    <button id="generate-btn" onclick="generateText()">Generate</button>
+    <!-- Text Area -->
+    <div class="input-group">
+      <label for="textInput">Text to Repeat</label>
+      <input type="text" id="textInput" placeholder="e.g. I Love You ❤️">
+    </div>
 
-    <label for="output-box">Output</label>
-    <textarea id="output-box" readonly></textarea>
+    <div class="flex-row">
+      <div class="flex-1">
+        <label for="countInput">Repeat Times</label>
+        <input type="number" id="countInput" placeholder="e.g. 100" min="1" max="10000">
+      </div>
+      <div class="flex-1">
+        <label for="separator">Separator</label>
+        <select id="separator">
+          <option value="newline">New Line (Enter)</option>
+          <option value="space">Space</option>
+          <option value="none">None (Attached)</option>
+        </select>
+      </div>
+    </div>
 
-    <button onclick="copyText()">Copy</button>
+    <!-- Action Button -->
+    <button onclick="generateText()" class="btn btn-primary" id="generateBtn">
+      🔁 Generate Text
+    </button>
+    <button onclick="clearAll()" class="btn btn-danger" style="margin-top: 10px;">
+      🗑️ Clear All
+    </button>
+
+    <!-- Result Section -->
+    <div class="result-section" id="resultSection">
+      <div class="input-group" style="margin-bottom: 0;">
+        <label>Generated Result</label>
+        <textarea id="outputBox" readonly></textarea>
+      </div>
+      
+      <div class="btn-group">
+        <button onclick="copyText()" class="btn btn-success">📋 Copy</button>
+        <button onclick="shareWhatsApp()" class="btn btn-whatsapp">💬 Send to WA</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">Developed by <span>Developer Shuvo</span></div>
   </div>
 
-  <!-- Toast message -->
-  <div id="copy-toast">Copied!</div>
-
   <script>
-    function generateText() {
-      const btn = document.getElementById('generate-btn');
-      btn.classList.add('loading');
-      btn.textContent = "Generating...";
-      setTimeout(() => {
-        let text = document.getElementById('text-input').value.trim();
-        let amount = parseInt(document.getElementById('amount-input').value);
-        let includeLineBreaks = document.getElementById('line-break').checked;
-        let outputBox = document.getElementById('output-box');
+    // Theme Setup
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      if (savedTheme === 'dark') document.getElementById('themeToggle').checked = true;
+    });
 
-        if (!text) {
-          outputBox.value = "⚠️ Please enter text.";
-        } else if (isNaN(amount) || amount <= 0) {
-          outputBox.value = "⚠️ Please enter a valid number.";
-        } else {
-          let separator = includeLineBreaks ? '\n' : ' ';
-          let result = Array(amount).fill(text).join(separator);
-          outputBox.value = result;
-        }
-        btn.classList.remove('loading');
-        btn.textContent = "Generate";
-      }, 500);
+    function toggleSettings() {
+      document.getElementById('settingsMenu').classList.toggle('active');
     }
 
-    function copyText() {
-      let outputBox = document.getElementById('output-box');
-      outputBox.select();
-      outputBox.setSelectionRange(0, 99999); // For mobile devices
-
-      try {
-        if (document.execCommand('copy')) {
-          showCopyToast();
-        } else {
-          alert('Copy failed! Please try manually.');
-        }
-      } catch (err) {
-        alert('Copy error: ' + err);
+    document.addEventListener('click', function(event) {
+      const menu = document.getElementById('settingsMenu');
+      const btn = document.getElementById('settingsBtn');
+      if (!menu.contains(event.target) && !btn.contains(event.target)) {
+        menu.classList.remove('active');
       }
+    });
+
+    function toggleTheme() {
+      const isDark = document.getElementById('themeToggle').checked;
+      const newTheme = isDark ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
     }
 
-    function showCopyToast() {
-      const toast = document.getElementById('copy-toast');
-      toast.style.opacity = '1';
+    // Logic
+    function generateText() {
+      const text = document.getElementById("textInput").value.trim();
+      const count = parseInt(document.getElementById("countInput").value);
+      const separatorType = document.getElementById("separator").value;
+      const btn = document.getElementById("generateBtn");
+
+      if (!text) return showToast("Please enter some text!", "#ef4444");
+      if (!count || count <= 0) return showToast("Please enter a valid number!", "#ef4444");
+      
+      // Prevent browser crash for extreme numbers
+      if (count > 10000) return showToast("Maximum limit is 10,000 times!", "#ef4444");
+
+      btn.disabled = true;
+      btn.innerHTML = "⚙️ Generating...";
+
       setTimeout(() => {
-        toast.style.opacity = '0';
-      }, 2000);
+        let sepChar = separatorType === 'newline' ? '\n' : separatorType === 'space' ? ' ' : '';
+        let result = Array(count).fill(text).join(sepChar);
+
+        document.getElementById("outputBox").value = result;
+        document.getElementById("resultSection").style.display = 'block';
+
+        btn.disabled = false;
+        btn.innerHTML = "🔁 Generate Text";
+        showToast("Text Generated! 🎉", "#10b981");
+      }, 300); // Slight delay for UI effect
     }
 
-    function toggleMode() {
-      document.body.classList.toggle('dark');
-      const toggleBtn = document.querySelector('.toggle-mode');
-      toggleBtn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    // Copy Text
+    function copyText() {
+      const outputBox = document.getElementById("outputBox");
+      if (!outputBox.value) return showToast("Nothing to copy!", "#ef4444");
+
+      outputBox.select();
+      outputBox.setSelectionRange(0, 99999);
+
+      navigator.clipboard.writeText(outputBox.value)
+        .then(() => showToast("Text Copied Successfully! 📋", "#2563eb"))
+        .catch(() => {
+          document.execCommand('copy');
+          showToast("Text Copied Successfully! 📋", "#2563eb");
+        });
+    }
+
+    // Share on WhatsApp
+    function shareWhatsApp() {
+      const text = document.getElementById("outputBox").value;
+      if (!text) return showToast("Nothing to share!", "#ef4444");
+      
+      const url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(text);
+      window.open(url, "_blank");
+    }
+
+    // Clear Form
+    function clearAll() {
+      document.getElementById("textInput").value = '';
+      document.getElementById("countInput").value = '';
+      document.getElementById("outputBox").value = '';
+      document.getElementById("resultSection").style.display = 'none';
+      showToast("All inputs cleared!", "#2563eb");
+    }
+
+    function showToast(message, color) {
+      Toastify({
+        text: message,
+        duration: 3000,
+        gravity: "top",
+        position: "center",
+        style: {
+          background: color,
+          borderRadius: "8px",
+          fontWeight: "bold"
+        }
+      }).showToast();
     }
   </script>
-
 </body>
 </html>
